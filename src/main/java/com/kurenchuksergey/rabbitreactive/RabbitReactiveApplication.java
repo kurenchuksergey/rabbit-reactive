@@ -2,7 +2,7 @@ package com.kurenchuksergey.rabbitreactive;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import reactor.core.publisher.Hooks;
 import reactor.tools.agent.ReactorDebugAgent;
 
 @SpringBootApplication

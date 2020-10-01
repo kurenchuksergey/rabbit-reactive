@@ -3,6 +3,7 @@ package com.kurenchuksergey.rabbitreactive.config;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.http.client.ReactorNettyClient;
+import com.rabbitmq.http.client.ReactorNettyClientOptions;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

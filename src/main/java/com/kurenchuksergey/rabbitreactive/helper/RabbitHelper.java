@@ -17,12 +17,15 @@ public class RabbitHelper {
         Flux<BindingInfo> bindings = client.getExchangeBindingsBySource("/", exchangeName);
         Flux<QueueInfo> queue = bindings
                 .filter(
-                        bindingInfo -> bindingInfo.getDestinationType().equals("queue")
+                        bindingInfo ->
+                                bindingInfo.getDestinationType().equals("queue")
                 )
                 .map(
-                        v -> v.getDestination())
+                        v ->
+                                v.getDestination())
                 .flatMap(
-                        name -> client.getQueue("/", name)
+                        name ->
+                                client.getQueue("/", name)
                 );
         return queue;
     }
