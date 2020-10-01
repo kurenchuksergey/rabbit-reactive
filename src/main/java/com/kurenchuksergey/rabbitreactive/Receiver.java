@@ -7,8 +7,10 @@ import com.rabbitmq.http.client.domain.QueueInfo;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.rabbitmq.*;
+import reactor.rabbitmq.RabbitFlux;
+import reactor.rabbitmq.ReceiverOptions;
 import reactor.rabbitmq.Sender;
+import reactor.rabbitmq.SenderOptions;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -24,16 +26,20 @@ public class Receiver {
         this.connectionMono = connectionMono;
         this.rabbitHelper = rabbitHelper;
         Sender sender = RabbitFlux.createSender(new SenderOptions().connectionMono(connectionMono));
-        sender.declareExchange(ExchangeSpecification.exchange("testExchange"))
-                .flatMapMany(v ->
-                        Flux.interval(Duration.ofSeconds(20)))
+//        createReceiver("q1")
+//
+//                .delaySubscription(sender.declareQueue(QueueSpecification.queue("q1").durable(true)))
+//                .subscribe(m->System.out.println(Arrays.toString(m.getBody())));
+//        sender.declareExchange(ExchangeSpecification.exchange("testExchange"))
+//                .thenMany(v ->
+        Flux.interval(Duration.ofSeconds(20))
                 .flatMap(v ->
                         scanExchange("testExchange")
-                                .switchMap(
+                                .flatMap(
                                         queueInfo ->
                                                 createReceiver(queueInfo.getName())
                                 )
-                ).checkpoint("testCheckpoint-1")
+                ).checkpoint("testCheckpoint-1", true)
                 .subscribe(delivery ->
                         System.out.println(Arrays.toString(delivery.getBody()))
                 );
@@ -43,20 +49,20 @@ public class Receiver {
     public Flux<QueueInfo> scanExchange(String exchangeName) {
         return rabbitHelper
                 .getQueuesByExchangeName(exchangeName)
-                .checkpoint("testCheckpoint0")
-                .filter(
-                        queueInfo ->
-                                queueInfo.getTotalMessages() > 0
-                )
-                .checkpoint("testCheckpoint")
-                .take(20);
+                .checkpoint("testCheckpoint0", true)
+//                .filter(
+//                        queueInfo ->
+//                                queueInfo.getTotalMessages() > 0
+//                )
+                .checkpoint("testCheckpoint", true);
+//                .take(20);
     }
 
 
     public Flux<Delivery> createReceiver(String queueName) {
         reactor.rabbitmq.Receiver receiver = RabbitFlux.createReceiver(new ReceiverOptions().connectionMono(connectionMono));
         return receiver
-                .consumeNoAck(queueName)
-                .take(Duration.of(10, ChronoUnit.SECONDS));
+                .consumeAutoAck(queueName);
+//                .take(Duration.of(10, ChronoUnit.SECONDS));
     }
 }
